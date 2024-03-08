@@ -9,9 +9,6 @@ import java.util.Random;
 
 @Component
 public class DataInjectorService {
-
-    @Autowired
-    private SensorDataService sensorDataService;
     @Autowired
     private SensorRawDataService sensorRawDataService;
 
@@ -41,9 +38,9 @@ public class DataInjectorService {
         }
     }
 
-    public void injectSensorData() {
+    public void injectSensorData(int dataSetSize) {
 
-        prepareAndSendSensorData(10);
+        prepareAndSendSensorData(dataSetSize);
 
     }
 
