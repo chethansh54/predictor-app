@@ -33,7 +33,7 @@ public class DatainjectorApplication implements CommandLineRunner {
             if (runMode.equalsIgnoreCase("INJECTOR")) {
                 dataInjectorService.injectSensorData(dataSetSize);
             } else {
-                List<Map<String, Integer>> mapList = new ArrayList<>();
+                List<Map<String, String>> mapList = new ArrayList<>();
                 dataPreProcessorService.preProcessSensorData(mapList);
             }
 
