@@ -9,7 +9,7 @@ import lombok.Data;
 public class SensorRawData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private int processing_id;
     private String sensor_name;
     private String sensor_type;
     private String manufacturer;

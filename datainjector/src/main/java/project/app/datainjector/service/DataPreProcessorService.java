@@ -1,32 +1,37 @@
 package project.app.datainjector.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import project.app.datainjector.model.SensorData;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+@Component
 public class DataPreProcessorService {
-    @Autowired
-    private SensorData sensorData;
 
-    public void preProcessSensorData() {
+    public void preProcessSensorData(List<Map<String, Integer>> msgList) {
 
-        long tsEpoch = System.currentTimeMillis();
+        long tsEpoch = 0L;
         int readingDataValue = 0;
-
         Map<String, Map<String, Integer>> dayWiseDataValues = new HashMap<>();
-        Map<String, Integer> defaultDataMap = new HashMap<>();
         Map<String, Integer> avgDayWiseDate = new HashMap<>();
+
+        Map<String, Integer> defaultDataMap = new HashMap<>();
 
         defaultDataMap.put("total", 0);
         defaultDataMap.put("nRecords", 0);
 
-        for (int i = 0; i < 10; i++) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+
+        for (Map<String, Integer> msgMap : msgList) {
+            tsEpoch = msgMap.get("received_ts");
+            readingDataValue = msgMap.get("reading_mgdl");
+
             Date tsDate = new Date(tsEpoch);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
             String tsDateString = sdf.format(tsDate);
 
             dayWiseDataValues.put(tsDateString, dayWiseDataValues.getOrDefault(tsDateString, defaultDataMap));
@@ -34,23 +39,9 @@ public class DataPreProcessorService {
             Integer nRecordsValue = dayWiseDataValues.getOrDefault(tsDateString, defaultDataMap).getOrDefault("nRecords", 0) + 1;
             dayWiseDataValues.get(tsDateString).put("total", totalValue);
             dayWiseDataValues.get(tsDateString).put("nRecords", nRecordsValue);
-        }
-
-        for (int i = 0; i < 10; i++) {
-
 
         }
 
-
     }
 
-    public static void main(String[] args) {
-        long tsEpoch = System.currentTimeMillis();
-        Date tsDate = new Date(tsEpoch);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String tsDateString = sdf.format(tsDate);
-
-        System.out.println(tsEpoch);
-        System.out.println(tsDateString);
-    }
 }

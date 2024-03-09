@@ -7,14 +7,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import project.app.datainjector.service.DataInjectorService;
 import project.app.datainjector.service.DataPreProcessorService;
 
-import javax.xml.crypto.Data;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @SpringBootApplication
 public class DatainjectorApplication implements CommandLineRunner {
 
     @Autowired
     private DataInjectorService dataInjectorService;
+
+    @Autowired
     private DataPreProcessorService dataPreProcessorService;
 
     public static void main(String[] args) {
@@ -24,13 +27,14 @@ public class DatainjectorApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         try {
-            String runMode = args[1];
-            Integer dataSetSize = Integer.parseInt(args[2]);
+            String runMode = args[0];
+            Integer dataSetSize = Integer.parseInt(args[1]);
 
             if (runMode.equalsIgnoreCase("INJECTOR")) {
                 dataInjectorService.injectSensorData(dataSetSize);
             } else {
-                dataPreProcessorService.preProcessSensorData();
+                List<Map<String, Integer>> mapList = new ArrayList<>();
+                dataPreProcessorService.preProcessSensorData(mapList);
             }
 
         } catch (Exception e) {
