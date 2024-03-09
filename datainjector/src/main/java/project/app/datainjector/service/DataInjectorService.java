@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import project.app.datainjector.model.SensorData;
 import project.app.datainjector.model.SensorRawData;
 
-import java.util.Random;
+import java.util.*;
 
 @Component
 public class DataInjectorService {
@@ -14,12 +14,13 @@ public class DataInjectorService {
     @Autowired
     private SensorDataService sensorDataService;
 
-    public void prepareAndSendSensorData(int dataSetSize) {
+    public List<Map<String, String>> prepareAndSendSensorData(int dataSetSize) {
         String sensorType = "GlucoMeter";
         String sensorName = "AccuCheck-Active";
         String manufacturer = "AccuCheck";
 
         Random random = new Random();
+        List<Map<String, String>> sensorDataList = new ArrayList<>();
 
         for (int i = 0; i < dataSetSize; i++) {
             SensorData sensorData = new SensorData();
@@ -46,14 +47,19 @@ public class DataInjectorService {
             sensorDataService.saveSensorData(sensorData);
             sensorRawDataService.saveSensorRawData(sensorRawData);
 
-            // send MQTT to Subscriber
-
+            // prepare list for processing
+            Map<String, String> sensorDataMap = new HashMap<>();
+            sensorDataMap.put("received_ts", String.valueOf(sensorData.getReceivedTimestamp()));
+            sensorDataMap.put("reading_mgdl", String.valueOf(sensorData.getReadingMgDl()));
+            sensorDataList.add(sensorDataMap);
         }
+
+        return sensorDataList;
     }
 
-    public void injectSensorData(int dataSetSize) {
+    public List<Map<String, String>> injectSensorData(int dataSetSize) {
 
-        prepareAndSendSensorData(dataSetSize);
+        return prepareAndSendSensorData(dataSetSize);
 
     }
 
