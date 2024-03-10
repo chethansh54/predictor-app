@@ -36,3 +36,9 @@ CREATE TABLE `users_info` (
   `role` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`uname`)
 );
+
+CREATE TABLE jobconfigmanager (
+servicename varchar(100),
+jobstatus varchar(50),
+lastupdatedts bigint
+);
