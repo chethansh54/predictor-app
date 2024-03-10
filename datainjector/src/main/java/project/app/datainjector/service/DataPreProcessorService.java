@@ -1,7 +1,10 @@
 package project.app.datainjector.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import project.app.datainjector.utils.DataMapperUtil;
 
+import javax.xml.crypto.Data;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,26 +14,28 @@ import java.util.Map;
 @Component
 public class DataPreProcessorService {
 
-    public void preProcessSensorData(List<Map<String, String>> msgList) {
+    @Autowired
+    public DataMapperUtil dataMapperUtil;
+
+    public String preProcessSensorData(List<Map<String, String>> msgList) {
         Long tsEpoch = 0L;
         int readingDataValue = 0;
 
         Map<String, Map<String, Integer>> dayWiseDataValues = new HashMap<>();
         Map<String, Integer> avgDayWiseDate = new HashMap<>();
 
-        Map<String, Integer> defaultDataMap = new HashMap<>();
-
-        defaultDataMap.put("total", 0);
-        defaultDataMap.put("nRecords", 0);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         for (Map<String, String> msgMap : msgList) {
-            tsEpoch = Long.parseLong(msgMap.get("received_ts"));
             readingDataValue = Integer.parseInt(msgMap.get("reading_mgdl"));
+            tsEpoch = Long.parseLong(msgMap.get("received_ts"));
 
-            Date tsDate = new Date(tsEpoch);
+            Date tsDate = new Date(tsEpoch * 1000);
             String tsDateString = sdf.format(tsDate);
+
+            Map<String, Integer> defaultDataMap = new HashMap<>();
+            defaultDataMap.put("total", 0);
+            defaultDataMap.put("nRecords", 0);
 
             dayWiseDataValues.put(tsDateString, dayWiseDataValues.getOrDefault(tsDateString, defaultDataMap));
             Integer totalValue = dayWiseDataValues.getOrDefault(tsDateString, defaultDataMap).getOrDefault("total", 0) + readingDataValue;
@@ -40,18 +45,7 @@ public class DataPreProcessorService {
 
         }
 
-        // get average daywise data
-
-        for (Map.Entry<String, Map<String, Integer>> entryObj : dayWiseDataValues.entrySet()) {
-            try {
-                int avgRecord = entryObj.getValue().getOrDefault("total", 0) / entryObj.getValue().getOrDefault("nRecords", 0);
-                avgDayWiseDate.put(entryObj.getKey(), avgRecord);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
-
+        // get average day wise data
+        return dataMapperUtil.getJsonStringFromMapLevel2(dayWiseDataValues);
     }
-
 }

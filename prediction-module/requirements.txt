@@ -1,0 +1,5 @@
+pika
+pandas
+prophet
+matplotlib
+mysql-connector-python

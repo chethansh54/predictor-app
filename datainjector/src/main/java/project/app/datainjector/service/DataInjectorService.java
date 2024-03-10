@@ -20,14 +20,15 @@ public class DataInjectorService {
         String manufacturer = "AccuCheck";
 
         Random random = new Random();
+
         List<Map<String, String>> sensorDataList = new ArrayList<>();
 
         for (int i = 0; i < dataSetSize; i++) {
             SensorData sensorData = new SensorData();
             SensorRawData sensorRawData = new SensorRawData();
 
-            int sensorReading = random.nextInt(600);
-            long sensorRcvTs = System.currentTimeMillis();
+            int sensorReading = random.nextInt(600 - 70) + 70;
+            long sensorRcvTs = random.nextLong((System.currentTimeMillis() / 1000) - 1704047400L) + 1704047400L;
 
             // get sensor raw data
             sensorRawData.setSensor_name(sensorName);
