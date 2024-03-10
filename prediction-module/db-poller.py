@@ -40,7 +40,7 @@ for result_value in job_data_result_set:
 
             if JOB_NAME.lower() == "rmq_data_consumer":
                 call(
-                    f"python3 {APP_EXECUTABLE_FILE_PATH} >> {LOG_FILE_PATH}/{JOB_NAME}_$(date +%Y_%m_%d_%H_%M).log",
+                    f"{APP_EXECUTABLE_FILE_PATH} >> {LOG_FILE_PATH}/{JOB_NAME}_$(date +%Y_%m_%d_%H_%M).log",
                     shell=True)
                 resp = call("echo $?", shell=True)
 
