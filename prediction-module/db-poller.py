@@ -13,8 +13,8 @@ predictordb = mysql.connector.connect(
 
 MYSQL_TABLE_NAME = "jobconfigmanager"
 JOB_NAME = sys.argv[1]
-DATA_INJECTOR_JAR_PATH = sys.argv[2]
-JAR_LOG_FILE_PATH = "~/logs/predictor-app"
+APP_EXECUTABLE_FILE_PATH = sys.argv[2]
+LOG_FILE_PATH = "~/logs/predictor-app"
 
 # make cursor to db with connection
 db_cursor = predictordb.cursor()
@@ -25,17 +25,29 @@ for result_value in job_data_result_set:
     try:
         job_status = result_value[0]
 
-        if job_status.upper() == "IDLE":
+        if job_status.upper() == "RUN":
             # set jobstate to RUNNING
             sql = f"UPDATE jobconfigmanager SET jobstatus ='RUNNING', lastupdatedts={int(time.time())} WHERE servicename='{JOB_NAME}'"
             db_cursor.execute(sql)
             predictordb.commit()
+            resp = 127
 
-            call(f"java -Xmx1024m -jar {DATA_INJECTOR_JAR_PATH} >> {JAR_LOG_FILE_PATH}/log_$(date +%Y_%m_%d_%H_%M).log",
-                 shell=True)
-            resp = call("echo $?", shell=True)
+            if JOB_NAME.lower() == "data_injector":
+                call(
+                    f"java -Xmx1024m -jar {APP_EXECUTABLE_FILE_PATH} >> {LOG_FILE_PATH}/{JOB_NAME}_$(date +%Y_%m_%d_%H_%M).log",
+                    shell=True)
+                resp = call("echo $?", shell=True)
+
+            if JOB_NAME.lower() == "rmq_data_consumer":
+                call(
+                    f"python3 {APP_EXECUTABLE_FILE_PATH} >> {LOG_FILE_PATH}/{JOB_NAME}_$(date +%Y_%m_%d_%H_%M).log",
+                    shell=True)
+                resp = call("echo $?", shell=True)
+
+            time.sleep(5)
+
             if resp == 0:
-                # set jobstate to RUNNING
+                # set jobstate to IDLE
                 sql = f"UPDATE jobconfigmanager SET jobstatus ='IDLE', lastupdatedts={int(time.time())} WHERE servicename='{JOB_NAME}'"
                 db_cursor.execute(sql)
                 predictordb.commit()

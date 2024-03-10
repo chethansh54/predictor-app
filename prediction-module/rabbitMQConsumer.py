@@ -1,4 +1,6 @@
 import json
+import os
+
 import pika
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -7,11 +9,21 @@ from ml_engine import MLPredictor
 if __name__ == '__main__':
     rabbitmq_ip = "localhost"
     rabbitmq_port = 5672
-
+    readings_chart_file = "bs-readings-graph.png"
+    prediction_chart_file = "prediction-graph.png"
     # Queue name
     rabbitmq_queque = "predictorappqueue"
 
+
     def callback(ch, method, properties, body):
+        if os.path.exists(readings_chart_file):
+            os.remove(readings_chart_file)
+            print(f"cleared old output files : {readings_chart_file}")
+
+        if os.path.exists(prediction_chart_file):
+            os.remove(prediction_chart_file)
+            print(f"cleared old output files : {prediction_chart_file}")
+
         bodyStr = body.decode('utf-8').replace("'", '"')
         print(f"Got message from producer msg: {bodyStr}")
 
@@ -22,6 +34,7 @@ if __name__ == '__main__':
         }
 
         data_df = pd.DataFrame(data_source)
+        data_df.sort_values(by=['Timestamp'], inplace=True)
 
         # Initialize a canvas
         plt.figure(figsize=(4, 4), dpi=100)
@@ -37,7 +50,7 @@ if __name__ == '__main__':
         plt.savefig("bs-readings-graph.png")
 
         # Directly display
-        # plt.show()
+        plt.show()
 
         # Create ML engine predictor object
         predictor = MLPredictor(data_df)
@@ -51,18 +64,23 @@ if __name__ == '__main__':
         # predict chart
         fig = predictor.plot_result(predictForecast)
         fig.savefig("prediction-graph.png")
-        # fig.show()
+        fig.show()
 
 
-    # Connect to RabbitMQ service with timeout 1min
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host=rabbitmq_ip, port=rabbitmq_port, socket_timeout=60))
-    channel = connection.channel()
-    # Declare a queue
-    channel.queue_declare(queue=rabbitmq_queque)
+    try:
+        # Connect to RabbitMQ service with timeout 1min
+        print(f"Listening to RabbitMQ message queue....")
 
-    channel.basic_consume(queue=rabbitmq_queque,
-                          auto_ack=True,
-                          on_message_callback=callback)
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host=rabbitmq_ip, port=rabbitmq_port, socket_timeout=60))
+        channel = connection.channel()
+        # Declare a queue
+        channel.queue_declare(queue=rabbitmq_queque)
 
-    channel.start_consuming()
+        channel.basic_consume(queue=rabbitmq_queque,
+                              auto_ack=True,
+                              on_message_callback=callback)
+
+        channel.start_consuming()
+    except Exception as e:
+        print(e.__str__())

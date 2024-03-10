@@ -2,4 +2,5 @@ pika
 pandas
 prophet
 matplotlib
+plotly
 mysql-connector-python
