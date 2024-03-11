@@ -1,11 +1,11 @@
 import json
 import os
 import sys
-import time
 
-import pika
 import matplotlib.pyplot as plt
 import pandas as pd
+import pika
+
 from ml_engine import MLPredictor
 
 if __name__ == '__main__':
@@ -16,16 +16,17 @@ if __name__ == '__main__':
     # Queue name
     rabbitmq_queque = "predictorappqueue"
 
+    print(f"Loaded RabbitMQ Configs..")
+    if os.path.exists(readings_chart_file):
+        os.remove(readings_chart_file)
+        print(f"cleared old output files : {readings_chart_file}")
+
+    if os.path.exists(prediction_chart_file):
+        os.remove(prediction_chart_file)
+        print(f"cleared old output files : {prediction_chart_file}")
+
 
     def callback(ch, method, properties, body):
-        if os.path.exists(readings_chart_file):
-            os.remove(readings_chart_file)
-            print(f"cleared old output files : {readings_chart_file}")
-
-        if os.path.exists(prediction_chart_file):
-            os.remove(prediction_chart_file)
-            print(f"cleared old output files : {prediction_chart_file}")
-
         bodyStr = body.decode('utf-8').replace("'", '"')
         print(f"Got message from producer msg: {bodyStr}")
 
@@ -43,14 +44,14 @@ if __name__ == '__main__':
 
         # Plot data into canvas
         plt.plot(data_df["Timestamp"], data_df["Value"], color="#FF3B1D", marker='.', linestyle="-")
-        plt.title("Prediction Data")
+        plt.title("Chart 1 : Blood Sugar Levels")
         plt.xlabel("DateTime")
         plt.xticks(rotation=90)
         plt.ylabel("Value")
 
         # Save as file
-        plt.savefig("bs-readings-graph.png")
-
+        plt.savefig(readings_chart_file)
+        print(f"Saved Chart1 at : {readings_chart_file}")
         # Directly display
         plt.show()
 
@@ -65,7 +66,8 @@ if __name__ == '__main__':
 
         # predict chart
         fig = predictor.plot_result(predictForecast)
-        fig.savefig("prediction-graph.png")
+        fig.savefig(prediction_chart_file)
+        print(f"Saved Chart2 at : {prediction_chart_file}")
         fig.show()
 
 
