@@ -1,16 +1,20 @@
 import json
 import os
+import sys
+import time
 
 import pika
 import matplotlib.pyplot as plt
 import pandas as pd
 from ml_engine import MLPredictor
 
+start_time = time.time()
+
 if __name__ == '__main__':
     rabbitmq_ip = "localhost"
     rabbitmq_port = 5672
-    readings_chart_file = "bs-readings-graph.png"
-    prediction_chart_file = "prediction-graph.png"
+    readings_chart_file = sys.argv[1]
+    prediction_chart_file = sys.argv[2]
     # Queue name
     rabbitmq_queque = "predictorappqueue"
 
@@ -82,5 +86,9 @@ if __name__ == '__main__':
                               on_message_callback=callback)
 
         channel.start_consuming()
+
+        # disconnect listener if more than 10 seconds
+        if int(time.time() - start_time) > 10:
+            exit(0)
     except Exception as e:
         print(e.__str__())

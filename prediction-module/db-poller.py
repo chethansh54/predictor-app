@@ -58,6 +58,6 @@ for result_value in job_data_result_set:
 
                 print("JobStatus RESET to IDLE")
         else:
-            print("Nothing to RUN")
+            print(f"{JOB_NAME}: Nothing to RUN")
     except Exception as e:
         print(e.__str__())
