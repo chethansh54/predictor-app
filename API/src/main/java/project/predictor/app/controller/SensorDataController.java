@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/v1/sensordata")
 public class SensorDataController {
     private SensorDataService sensorDataService;

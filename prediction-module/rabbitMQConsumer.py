@@ -8,8 +8,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from ml_engine import MLPredictor
 
-start_time = time.time()
-
 if __name__ == '__main__':
     rabbitmq_ip = "localhost"
     rabbitmq_port = 5672
@@ -87,8 +85,5 @@ if __name__ == '__main__':
 
         channel.start_consuming()
 
-        # disconnect listener if more than 10 seconds
-        if int(time.time() - start_time) > 10:
-            exit(0)
     except Exception as e:
         print(e.__str__())
