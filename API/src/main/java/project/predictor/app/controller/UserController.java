@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/v1/users")
 public class UserController {
     private UserService userService;
@@ -53,6 +54,7 @@ public class UserController {
 
         if (authSuccess) {
             responseData.put("auth", "success");
+            responseData.put("user", userName);
             return new ResponseEntity<>(responseData, HttpStatus.OK);
         } else {
             responseData.put("auth", "failed");

@@ -1,6 +1,7 @@
 package project.predictor.app.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -8,6 +9,7 @@ import lombok.Data;
 @Entity
 @Table(name = "jobconfigmanager")
 public class JobConfig {
+    @Id
     private String servicename;
     private String jobstatus;
     private long lastupdatedts;

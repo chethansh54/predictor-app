@@ -42,3 +42,7 @@ servicename varchar(100),
 jobstatus varchar(50),
 lastupdatedts bigint
 );
+
+
+INSERT INTO jobconfigmanager VALUES ("data_injector","IDLE",1710079287);
+INSERT INTO jobconfigmanager VALUES ("rmq_data_consumer","IDLE",1710079287);

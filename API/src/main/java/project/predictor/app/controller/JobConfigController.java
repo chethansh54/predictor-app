@@ -2,9 +2,7 @@ package project.predictor.app.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import project.predictor.app.model.JobConfig;
 import project.predictor.app.service.JobConfigService;
 
@@ -12,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/v1/jobconfig")
 public class JobConfigController {
     private JobConfigService jobConfigService;
@@ -22,7 +21,7 @@ public class JobConfigController {
     }
 
     // store processed data
-    @PostMapping("run/datainjector")
+    @GetMapping("run/datainjector")
     public ResponseEntity<Map> runDataInjector() {
         JobConfig jobConfig = new JobConfig();
 
@@ -44,7 +43,7 @@ public class JobConfigController {
         }
     }
 
-    @PostMapping("run/rmqexecutor")
+    @GetMapping("run/rmqexecutor")
     public ResponseEntity<Map> runRabbitMQExecutor() {
         JobConfig jobConfig = new JobConfig();
 
