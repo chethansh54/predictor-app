@@ -21,6 +21,10 @@ db_cursor = predictordb.cursor()
 db_cursor.execute(f"SELECT jobstatus FROM {MYSQL_TABLE_NAME} where servicename='{JOB_NAME}'")
 job_data_result_set = db_cursor.fetchall()
 
+print(f"JOB_NAME={JOB_NAME}")
+print(f"APP_EXECUTABLE_FILE_PATH={APP_EXECUTABLE_FILE_PATH}")
+print(f"LOG_FILE_PATH={LOG_FILE_PATH}")
+
 for result_value in job_data_result_set:
     try:
         job_status = result_value[0]
@@ -52,5 +56,8 @@ for result_value in job_data_result_set:
                 db_cursor.execute(sql)
                 predictordb.commit()
 
+                print("JobStatus RESET to IDLE")
+        else:
+            print("Nothing to RUN")
     except Exception as e:
         print(e.__str__())

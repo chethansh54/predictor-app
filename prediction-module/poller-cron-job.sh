@@ -1,1 +1,1 @@
-* * * * * ~/prediction-module/dbPoller.sh "~/prediction-module"
+* * * * * ~/prediction-module/dbPoller.sh ~/prediction-module
