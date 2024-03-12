@@ -1,10 +1,14 @@
 package project.predictor.app.controller;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.predictor.app.model.SensorData;
 import project.predictor.app.model.SensorRawData;
+import project.predictor.app.service.DataInjectorService;
+import project.predictor.app.service.DataPreProcessorService;
 import project.predictor.app.service.SensorDataService;
 import project.predictor.app.service.SensorRawDataService;
 
@@ -19,10 +23,21 @@ public class SensorDataController {
     private SensorDataService sensorDataService;
     private SensorRawDataService sensorRawDataService;
 
-    public SensorDataController(SensorDataService sensorDataService, SensorRawDataService sensorRawDataService) {
+    @Autowired
+    private DataInjectorService dataInjectorService;
+
+    @Autowired
+    private DataPreProcessorService dataPreProcessorService;
+
+    private final RabbitTemplate rabbitTemplate;
+    static final String topicExchangeName = "predictorapp";
+
+
+    public SensorDataController(SensorDataService sensorDataService, SensorRawDataService sensorRawDataService, RabbitTemplate rabbitTemplate) {
         super();
         this.sensorDataService = sensorDataService;
         this.sensorRawDataService = sensorRawDataService;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     // store processed data
@@ -67,6 +82,38 @@ public class SensorDataController {
     public ResponseEntity<List<SensorRawData>> viewSensorRawData() {
         List<SensorRawData> sensorRawDataList = sensorRawDataService.getAllSensorRawData();
         return new ResponseEntity<>(sensorRawDataList, HttpStatus.OK);
+    }
+
+    @GetMapping("datainjector/datastore")
+    public ResponseEntity<Map> runDataInjector(@RequestParam(name = "dataSetSize") String dataSetSize) {
+        boolean isDataGenerated = false;
+
+        try {
+            // run data generator and process it
+            List<Map<String, String>> mapList = dataInjectorService.injectSensorData(Integer.parseInt(dataSetSize));
+            String processedDataMessage = dataPreProcessorService.preProcessSensorData(mapList);
+
+            if (processedDataMessage.length() > 2) {
+                isDataGenerated = true;
+            }
+            System.out.println("Sending processed data ...........");
+            rabbitTemplate.convertAndSend(topicExchangeName, "predictor", processedDataMessage);
+            System.out.println("Processed Data Send : Complete !");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Map<String, String> responseData = new HashMap<>();
+
+        if (isDataGenerated) {
+            responseData.put("message", "success");
+            return new ResponseEntity<>(responseData, HttpStatus.CREATED);
+        } else {
+            responseData.put("message", "failed");
+            return new ResponseEntity<>(responseData, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
 }

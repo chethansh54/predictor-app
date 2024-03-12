@@ -1,9 +1,9 @@
 package project.predictor.app.controller;
 
-import org.springframework.web.bind.annotation.*;
-import project.predictor.app.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import project.predictor.app.model.User;
 import project.predictor.app.service.UserService;
 
 import java.util.HashMap;
@@ -21,7 +21,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("users")
+    @PostMapping("createuser")
     public ResponseEntity<Map> saveUser(@RequestBody User user) {
         User createdUser = userService.saveUser(user);
         Map<String, String> responseData = new HashMap<>();
